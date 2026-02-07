@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@600;700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --primary: #6b21a8;
+  --accent: #8b5cf6;
+  --muted: #f3e9fb;
+}
+
+/* page background like screenshots */
+body {
+  @apply bg-gradient-to-b from-[#fff8ff] via-[#fbf0ff] to-[#f6ecff] text-[#46306b] font-body;
+  min-height: 100vh;
+}
+
+/* hero display style */
+.huge-hero {
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  color: #4b2c82;
+}
+
+/* card base */
+.card {
+  @apply bg-white/90 rounded-2xl shadow-[0_8px_30px_rgba(107,33,168,0.06)] p-8;
+}
+
+/* primary button */
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-8 py-3 text-white font-semibold;
+  background: linear-gradient(90deg,var(--accent),var(--primary));
+  box-shadow: 0 8px 20px rgba(107,33,168,0.18);
+}
+
+/* outline button */
+.btn-outline {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 border-2 border-[#f0e5ff] text-[#6b21a8] font-medium;
+}
+
+/* mood card */
+.mood-card {
+  @apply bg-white/90 border-2 border-[#f3e2ff] rounded-xl p-6 flex flex-col items-center gap-4;
+}
+
+/* floating profile avatar */
+.avatar {
+  @apply w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-[#9f7aea] to-[#7c3aed] text-white font-semibold;
+}

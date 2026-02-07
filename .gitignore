@@ -1,0 +1,54 @@
+# -----------------------
+# Global Gitignore
+# -----------------------
+
+# ===== Python =====
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+
+# Virtual Envs
+venv/
+env/
+ENV/
+
+# ===== Node / JS / Vite =====
+node_modules/
+dist/
+build/
+.cache/
+.vite/
+.next/
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# ===== Environment Files =====
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# ===== OS Files =====
+.DS_Store
+Thumbs.db
+
+# ===== IDE =====
+.vscode/
+.idea/
+
+# ===== Misc =====
+*.tmp
+*.swp
+*.swo
