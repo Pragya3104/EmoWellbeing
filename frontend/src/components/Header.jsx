@@ -24,7 +24,7 @@ export default function Header() {
   const navigate = useNavigate();
 
   return (
-    <header className="w-full bg-white/40 backdrop-blur-sm sticky top-0 z-30">
+    <header className="w-full bg-white/70 backdrop-blur-md shadow-sm sticky top-0 z-30">
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
 
         {/* ✅ LOGO */}

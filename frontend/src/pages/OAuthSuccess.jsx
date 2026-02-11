@@ -10,6 +10,7 @@ export default function OAuthSuccess() {
 
   useEffect(() => {
     const token = params.get("token");
+
     if (!token) {
       navigate("/login");
       return;
@@ -17,15 +18,17 @@ export default function OAuthSuccess() {
 
     async function finishLogin() {
       try {
+        // ✅ Save token first
         localStorage.setItem("emowell_token", token);
 
+        // ✅ Fetch real user from backend
         const user = await apiRequest("/api/auth/me");
 
-        login(res.access_token, res.user);
+        // ✅ Now login properly
+        login(token, user);
 
-        navigate("/chat");
       } catch (err) {
-        console.error(err);
+        console.error("OAuth failed:", err);
         navigate("/login");
       }
     }
@@ -33,5 +36,5 @@ export default function OAuthSuccess() {
     finishLogin();
   }, []);
 
-  return <p>Signing you in…</p>;
+  return <p className="text-center mt-10">Signing you in...</p>;
 }

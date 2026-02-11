@@ -90,15 +90,6 @@ export const refreshToken = async () => {
 };
 
 /* ---------------------------
-   CHAT
----------------------------- */
-export const sendChatMessage = (message) =>
-  apiRequest("/api/chat/send", {
-    method: "POST",
-    body: JSON.stringify({ message }),
-  });
-
-/* ---------------------------
    MOOD
 ---------------------------- */
 export const submitMood = (data) =>
@@ -117,4 +108,26 @@ export const sendContactMessage = (data) =>
   apiRequest("/api/contact", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+
+/* ---------------------------
+   Chat History
+---------------------------- */
+export const getChatHistory = () =>
+  apiRequest("/api/chat/history");
+
+
+export const createConversation = () =>
+  apiRequest("/api/chat/conversation", { method: "POST" });
+
+export const getConversations = () =>
+  apiRequest("/api/chat/conversations");
+
+export const getMessages = (id) =>
+  apiRequest(`/api/chat/conversation/${id}`);
+
+export const sendChatMessage = (conversationId, message) =>
+  apiRequest(`/api/chat/send?conversation_id=${conversationId}`, {
+    method: "POST",
+    body: JSON.stringify({ message }),
   });

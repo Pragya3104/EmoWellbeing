@@ -7,6 +7,7 @@ from .db import get_db
 from .auth import get_current_user
 from .hf_sentiment import analyze_sentiment
 from .llm_client import generate_ai_reply
+from .models import Conversation
 
 chat_router = APIRouter(prefix="/api/chat")
 
@@ -14,44 +15,88 @@ chat_router = APIRouter(prefix="/api/chat")
 @chat_router.post("/send")
 def send_message(
     data: ChatRequest,
+    conversation_id: int,
     db: Session = Depends(get_db),
     user = Depends(get_current_user),
 ):
-    """
-    Accepts a chat message from an authenticated user,
-    analyzes sentiment, generates AI reply,
-    stores chat in MySQL and returns it.
-    """
 
-    if not user or not user.id:
-        raise HTTPException(status_code=401, detail="Invalid user credentials")
+    conversation = db.query(Conversation).filter(
+        Conversation.id == conversation_id,
+        Conversation.user_id == user.id
+    ).first()
 
-    try:
-        sentiment, confidence = analyze_sentiment(data.message)
-        ai_reply = generate_ai_reply(data.message)
+    if not conversation:
+        raise HTTPException(404, "Conversation not found")
 
-        chat = ChatMessage(
-            user_id=user.id,
-            message=data.message,
-            response=ai_reply,
-            sentiment=sentiment,
-            confidence=float(confidence),
-        )
+    sentiment, confidence = analyze_sentiment(data.message)
+    ai_reply = generate_ai_reply(data.message)
 
-        db.add(chat)
-        db.commit()
-        db.refresh(chat)
+    chat = ChatMessage(
+        conversation_id=conversation.id,
+        user_id=user.id,
+        message=data.message,
+        response=ai_reply,
+        sentiment=sentiment,
+        confidence=float(confidence),
+    )
 
-        return {
-            "id": chat.id,
-            "user_id": chat.user_id,
-            "message": chat.message,
-            "response": chat.response,
-            "sentiment": chat.sentiment,
-            "confidence": chat.confidence,
-            "timestamp": chat.timestamp.isoformat()
-        }
+    db.add(chat)
 
-    except Exception as e:
-        print("❌ Chat error:", e)
-        raise HTTPException(status_code=500, detail="Failed to process message")
+    # Auto-generate title if first message
+    if conversation.title == "New Chat":
+        conversation.title = data.message[:40]
+
+    db.commit()
+    db.refresh(chat)
+
+    return chat
+
+
+@chat_router.get("/history")
+def get_chat_history(
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user),
+):
+    chats = (
+        db.query(ChatMessage)
+        .filter(ChatMessage.user_id == user.id)
+        .order_by(ChatMessage.timestamp.asc())
+        .all()
+    )
+
+    return chats
+
+@chat_router.post("/conversation")
+def create_conversation(
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
+):
+    conversation = Conversation(user_id=user.id)
+    db.add(conversation)
+    db.commit()
+    db.refresh(conversation)
+    return conversation
+
+@chat_router.get("/conversations")
+def get_conversations(
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
+):
+    return db.query(Conversation)\
+        .filter(Conversation.user_id == user.id)\
+        .order_by(Conversation.created_at.desc())\
+        .all()
+
+@chat_router.get("/conversation/{conversation_id}")
+def get_messages(
+    conversation_id: int,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user)
+):
+    return db.query(ChatMessage)\
+        .filter(
+            ChatMessage.conversation_id == conversation_id,
+            ChatMessage.user_id == user.id
+        )\
+        .order_by(ChatMessage.timestamp)\
+        .all()

@@ -51,3 +51,5 @@ body {
 .avatar {
   @apply w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-[#9f7aea] to-[#7c3aed] text-white font-semibold;
 }
+
+

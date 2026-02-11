@@ -24,13 +24,17 @@ class ChatMessage(Base):
     __tablename__ = "chat_messages"
 
     id = Column(Integer, primary_key=True, index=True)
+    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE"))
     user_id = Column(Integer, ForeignKey("users.id"))
+
     message = Column(Text, nullable=False)
     response = Column(Text, nullable=False)
     sentiment = Column(String(20))
     confidence = Column(Float)
+
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
+    conversation = relationship("Conversation", back_populates="messages")
     user = relationship("User", back_populates="chats")
 
 
@@ -72,3 +76,14 @@ class TokenBlacklist(Base):
     jti = Column(String(255), unique=True, nullable=False)
     expires_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class Conversation(Base):
+    __tablename__ = "conversations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    title = Column(String(255), default="New Chat")
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = relationship("User", backref="conversations")
+    messages = relationship("ChatMessage", back_populates="conversation", cascade="all, delete")
