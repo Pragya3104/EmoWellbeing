@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
+import GlowCard from "../components/GlowCard";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -53,6 +54,7 @@ export default function Login() {
 
   return (
     <div className="max-w-md mx-auto px-6 py-16">
+      <GlowCard>
       <form onSubmit={submit} className="card">
         <h2 className="text-3xl font-semibold text-center mb-6">Login</h2>
 
@@ -87,6 +89,8 @@ export default function Login() {
           Continue with Google
         </button>
       </form>
+      </GlowCard>
     </div>
+    
   );
 }

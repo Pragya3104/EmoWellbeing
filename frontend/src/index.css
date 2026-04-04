@@ -1,22 +1,101 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@600;700;900&display=swap');
+@import "@fontsource-variable/geist";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root{
-  --primary: #6b21a8;
-  --accent: #8b5cf6;
-  --muted: #f3e9fb;
+/* ========================= */
+/* 🎨 DESIGN TOKENS (shadcn) */
+/* ========================= */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 270 40% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 270 40% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 270 40% 10%;
+
+    --primary: 270 90% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 40% 96%;
+    --secondary-foreground: 270 40% 10%;
+
+    --muted: 270 40% 96%;
+    --muted-foreground: 270 20% 40%;
+
+    --accent: 270 40% 96%;
+    --accent-foreground: 270 40% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 270 20% 85%;
+    --input: 270 20% 85%;
+    --ring: 270 90% 60%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 270 40% 10%;
+    --foreground: 0 0% 98%;
+
+    --card: 270 40% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 270 40% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 270 90% 70%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 20% 20%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 270 20% 20%;
+    --muted-foreground: 270 20% 70%;
+
+    --accent: 270 20% 20%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 270 20% 25%;
+    --input: 270 20% 25%;
+    --ring: 270 90% 70%;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    @apply font-sans;
+  }
 }
 
-/* page background like screenshots */
+/* ========================= */
+/* 🌈 YOUR CUSTOM UI STYLES */
+/* ========================= */
+
+/* page background */
 body {
   @apply bg-gradient-to-b from-[#fff8ff] via-[#fbf0ff] to-[#f6ecff] text-[#46306b] font-body;
   min-height: 100vh;
 }
 
-/* hero display style */
+/* hero display */
 .huge-hero {
   font-family: 'Playfair Display', serif;
   font-weight: 800;
@@ -25,7 +104,7 @@ body {
   color: #4b2c82;
 }
 
-/* card base */
+/* card */
 .card {
   @apply bg-white/90 rounded-2xl shadow-[0_8px_30px_rgba(107,33,168,0.06)] p-8;
 }
@@ -33,7 +112,7 @@ body {
 /* primary button */
 .btn-primary {
   @apply inline-flex items-center justify-center gap-2 rounded-full px-8 py-3 text-white font-semibold;
-  background: linear-gradient(90deg,var(--accent),var(--primary));
+  background: linear-gradient(90deg, #8b5cf6, #6b21a8);
   box-shadow: 0 8px 20px rgba(107,33,168,0.18);
 }
 
@@ -47,9 +126,7 @@ body {
   @apply bg-white/90 border-2 border-[#f3e2ff] rounded-xl p-6 flex flex-col items-center gap-4;
 }
 
-/* floating profile avatar */
+/* avatar */
 .avatar {
   @apply w-10 h-10 rounded-full flex items-center justify-center bg-gradient-to-br from-[#9f7aea] to-[#7c3aed] text-white font-semibold;
 }
-
-

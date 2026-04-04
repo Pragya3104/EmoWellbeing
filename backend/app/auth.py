@@ -189,7 +189,7 @@ def logout(
         # Revoke all refresh tokens for user
         db.query(RefreshToken).filter(
             RefreshToken.user_id == int(payload["sub"]),
-            RefreshToken.revoked == False
+            RefreshToken.is_revoked == False
         ).update({"is_revoked": True})
 
         db.commit()
