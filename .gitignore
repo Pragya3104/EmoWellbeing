@@ -1,28 +1,33 @@
 # -----------------------
-# Global Gitignore
+# Python
 # -----------------------
-
-# ===== Python =====
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.pdb
-*.egg-info/
-.eggs/
-.pytest_cache/
-.mypy_cache/
+*.py[cod]
+*$py.class
 
-# Virtual Envs
+# Virtual environments
 venv/
 env/
 ENV/
+.venv/
 
-# ===== Node / JS / Vite =====
+# Python packaging
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Caches
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+# -----------------------
+# Node / Frontend
+# -----------------------
 node_modules/
 dist/
 build/
-.cache/
 .vite/
 .next/
 *.tsbuildinfo
@@ -33,22 +38,39 @@ yarn-error.log*
 logs/
 *.log
 
-# ===== Environment Files =====
+# -----------------------
+# Environment & Secrets 🔥
+# -----------------------
 .env
-.env.local
-.env.*.local
+.env.*
+*.env
+
+# Specific project envs
 backend/.env
 frontend/.env
 
-# ===== OS Files =====
+# Alembic / DB configs (IMPORTANT 🔥)
+alembic.ini
+
+# Optional: if you store DB configs here
+config.py
+settings.py
+
+# -----------------------
+# OS Files
+# -----------------------
 .DS_Store
 Thumbs.db
 
-# ===== IDE =====
+# -----------------------
+# IDE
+# -----------------------
 .vscode/
 .idea/
 
-# ===== Misc =====
+# -----------------------
+# Misc
+# -----------------------
 *.tmp
 *.swp
 *.swo

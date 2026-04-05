@@ -19,11 +19,15 @@ export function AuthProvider({ children }) {
   const login = (accessToken, userData) => {
     setUser(userData);
     setToken(accessToken);
-
     localStorage.setItem("emowell_token", accessToken);
     localStorage.setItem("emowell_user", JSON.stringify(userData));
-
     window.location.href = "/";
+  };
+
+  // Also sync localStorage when profile is updated from Profile page
+  const updateUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem("emowell_user", JSON.stringify(userData));
   };
 
   const logout = async () => {
@@ -32,18 +36,24 @@ export function AuthProvider({ children }) {
     } catch {
       console.warn("Logout API failed, clearing session anyway");
     }
-
     setUser(null);
     setToken(null);
-
     localStorage.removeItem("emowell_token");
     localStorage.removeItem("emowell_user");
+    window.location.href = "/login";
+  };
 
+  // Called after account deletion — clears everything locally
+  const clearSession = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem("emowell_token");
+    localStorage.removeItem("emowell_user");
     window.location.href = "/login";
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateUser, clearSession }}>
       {children}
     </AuthContext.Provider>
   );

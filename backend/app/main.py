@@ -45,7 +45,8 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     # Create tables if not exist
-    Base.metadata.create_all(bind=engine)
+    pass
+
 
 # -------------------------
 # ROUTES

@@ -377,7 +377,7 @@ export default function Chat() {
                 ✨
               </div>
 
-              <h2 className="text-xl font-semibold text-[#2d1b4e] mb-2">
+              <h2 className="text-xl font-serif text-[#2d1b4e] mb-2">
                 How can I help you today?
               </h2>
 
