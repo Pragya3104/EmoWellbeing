@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Home from './pages/Home'
@@ -14,39 +14,46 @@ import OAuthSuccess from "./pages/OAuthSuccess"
 import LiquidEther from "@/components/LiquidEther"
 
 export default function App(){
+  const location = useLocation()
+  const isChatPage = location.pathname === "/chat"
+
   return (
-    <div className="relative min-h-screen">
+    <div className="min-h-screen flex flex-col">
 
-      {/* 🌊 GLOBAL LIQUID BACKGROUND */}
-      <div className="fixed inset-0 -z-10 pointer-events-none">
-        <LiquidEther
-          mouseForce={20}
-          cursorSize={100}
-          isViscous
-          viscous={30}
-          colors={["#9e27ff","#FF9FFC","#bda9ff"]}
-          autoDemo
-          autoSpeed={0.5}
-          autoIntensity={2.2}
-          isBounce={false}
-          resolution={0.5}
-        />
-      </div>
+      {/* 🌊 BACKGROUND (ONLY NON-CHAT) */}
+      {!isChatPage && (
+        <>
+          <div className="fixed inset-0 -z-10 pointer-events-none">
+            <LiquidEther
+              mouseForce={20}
+              cursorSize={100}
+              isViscous
+              viscous={30}
+              colors={["#9e27ff","#FF9FFC","#bda9ff"]}
+              autoDemo
+              autoSpeed={0.5}
+              autoIntensity={2.2}
+              isBounce={false}
+              resolution={0.5}
+            />
+          </div>
 
-      {/* 🌫️ SOFT OVERLAY (IMPORTANT for readability) */}
-      <div
-        className="fixed inset-0 -z-10 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(circle at center, transparent 30%, rgba(248,243,255,0.7) 80%)",
-        }}
-      />
+          <div
+            className="fixed inset-0 -z-10 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle at center, transparent 30%, rgba(248,243,255,0.7) 80%)",
+            }}
+          />
+        </>
+      )}
 
       {/* 🌐 APP CONTENT */}
-      <div className="relative z-10 min-h-screen flex flex-col">
+      <div className="relative z-10 flex flex-col flex-1">
         <Header />
 
-        <main className="flex-1">
+        {/* ✅ IMPORTANT: allow normal scroll */}
+        <main className="flex-1 flex">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/mood" element={<MoodCheckIn />} />
@@ -60,7 +67,8 @@ export default function App(){
           </Routes>
         </main>
 
-        <Footer />
+        {/*FOOTER ONLY ON HOME PAGE */}
+        {location.pathname === "/" && <Footer />}
       </div>
 
     </div>

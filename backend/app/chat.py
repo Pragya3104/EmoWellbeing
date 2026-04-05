@@ -100,3 +100,30 @@ def get_messages(
         )\
         .order_by(ChatMessage.timestamp)\
         .all()
+
+
+# ✅ DELETE CONVERSATION (cascades to all its messages)
+@chat_router.delete("/conversation/{conversation_id}")
+def delete_conversation(
+    conversation_id: int,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user),
+):
+    conversation = db.query(Conversation).filter(
+        Conversation.id == conversation_id,
+        Conversation.user_id == user.id
+    ).first()
+
+    if not conversation:
+        raise HTTPException(404, "Conversation not found")
+
+    # Delete all messages in this conversation first
+    db.query(ChatMessage).filter(
+        ChatMessage.conversation_id == conversation_id
+    ).delete()
+
+    # Then delete the conversation itself
+    db.delete(conversation)
+    db.commit()
+
+    return { "success": True, "deleted_id": conversation_id }

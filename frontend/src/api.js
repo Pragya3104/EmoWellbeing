@@ -3,7 +3,46 @@ const API_BASE = "http://localhost:8000";
 /* ---------------------------
    Core request helper
 ---------------------------- */
-export async function apiRequest(endpoint, options = {}) {
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+function onTokenRefreshed(newToken) {
+  refreshSubscribers.forEach((cb) => cb(newToken));
+  refreshSubscribers = [];
+}
+
+async function attemptTokenRefresh() {
+  if (isRefreshing) {
+    // Queue this request until refresh completes
+    return new Promise((resolve) => refreshSubscribers.push(resolve));
+  }
+
+  isRefreshing = true;
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!res.ok) throw new Error("Refresh failed");
+
+    const data = await res.json();
+    const newToken = data.access_token;
+    localStorage.setItem("emowell_token", newToken);
+    onTokenRefreshed(newToken);
+    return newToken;
+  } catch {
+    // Refresh failed — clear session and redirect
+    localStorage.removeItem("emowell_token");
+    localStorage.removeItem("emowell_user");
+    window.location.replace("/login");
+    throw new Error("Session expired");
+  } finally {
+    isRefreshing = false;
+  }
+}
+
+export async function apiRequest(endpoint, options = {}, _retry = false) {
   const token = localStorage.getItem("emowell_token");
 
   const config = {
@@ -23,8 +62,18 @@ export async function apiRequest(endpoint, options = {}) {
     data = await res.json();
   } catch {}
 
-  if (res.status === 401) {
-    console.error("❌ Unauthorized. Clearing session.");
+  if (res.status === 401 && !_retry) {
+    // Try to silently refresh the token once before logging out
+    try {
+      await attemptTokenRefresh();
+      return apiRequest(endpoint, options, true); // retry original request with new token
+    } catch {
+      throw new Error("Session expired");
+    }
+  }
+
+  if (res.status === 401 && _retry) {
+    // Refresh already tried and failed — log out
     localStorage.removeItem("emowell_token");
     localStorage.removeItem("emowell_user");
     window.location.replace("/login");
@@ -116,7 +165,6 @@ export const sendContactMessage = (data) =>
 export const getChatHistory = () =>
   apiRequest("/api/chat/history");
 
-
 export const createConversation = () =>
   apiRequest("/api/chat/conversation", { method: "POST" });
 
@@ -131,3 +179,7 @@ export const sendChatMessage = (conversationId, message) =>
     method: "POST",
     body: JSON.stringify({ message }),
   });
+
+// ✅ DELETE CONVERSATION
+export const deleteConversation = (id) =>
+  apiRequest(`/api/chat/conversation/${id}`, { method: "DELETE" });
