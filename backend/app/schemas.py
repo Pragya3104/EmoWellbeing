@@ -19,19 +19,41 @@ class UserLogin(BaseModel):
 
 
 class UserResponse(BaseModel):
-    id: int
-    name: str
-    email: EmailStr
-    created_at: datetime
+    id:           int
+    name:         str
+    email:        EmailStr
+    bio:          Optional[str]   = None
+    theme:        Optional[str]   = "purple"
+    tips_enabled: Optional[bool]  = False
+    notif_chat:   Optional[bool]  = True
+    notif_mood:   Optional[bool]  = True
+    created_at:   datetime
 
     class Config:
         from_attributes = True
 
 
 class Token(BaseModel):
-    access_token: str
-    token_type: str
-    user: UserResponse
+    access_token:  str
+    token_type:    str
+    user:          UserResponse
+
+
+# ── Update profile ──────────────────────────────────────────
+class UpdateProfileRequest(BaseModel):
+    name:         Optional[str]  = None
+    bio:          Optional[str]  = None
+    theme:        Optional[str]  = None
+    tips_enabled: Optional[bool] = None
+    notif_chat:   Optional[bool] = None
+    notif_mood:   Optional[bool] = None
+
+
+# ── Change password ─────────────────────────────────────────
+class ChangePasswordRequest(BaseModel):
+    old_password:     str
+    new_password:     str
+    confirm_password: str
 
 
 # =========================
@@ -43,12 +65,12 @@ class ChatRequest(BaseModel):
 
 
 class ChatResponse(BaseModel):
-    id: int
-    message: str
-    response: str
-    sentiment: str
+    id:         int
+    message:    str
+    response:   str
+    sentiment:  str
     confidence: float
-    timestamp: datetime
+    timestamp:  datetime
 
     class Config:
         from_attributes = True
@@ -68,6 +90,6 @@ class MoodCheckIn(BaseModel):
 # =========================
 
 class ContactMessageCreate(BaseModel):
-    name: str
-    email: EmailStr
+    name:    str
+    email:   EmailStr
     message: str

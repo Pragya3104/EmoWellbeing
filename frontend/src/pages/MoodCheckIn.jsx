@@ -94,11 +94,11 @@ const MOODS = [
 
 const MAX_NOTE = 500
 
-/* ── Soft pulsing ring on selected card ── */
+/* ── Styles ── */
 const pulseStyle = `
   @keyframes moodPulse {
-    0%, 100% { box-shadow: 0 0 0 0px var(--glow); }
-    50%       { box-shadow: 0 0 0 8px transparent; }
+    0%, 100% { box-shadow: 0 0 0 0 var(--pulse-color); }
+    50%       { box-shadow: 0 0 0 6px transparent; }
   }
   @keyframes fadeSlideUp {
     from { opacity: 0; transform: translateY(14px); }
@@ -108,6 +108,50 @@ const pulseStyle = `
     0%   { transform: scale(0.8); opacity: 0; }
     60%  { transform: scale(1.08); }
     100% { transform: scale(1);   opacity: 1; }
+  }
+  .mood-card-wrap {
+    position: relative;
+    border-radius: 18px;
+  }
+  /* The spotlight layer — sits on top via pointer-events:none */
+  .mood-spotlight {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .mood-card-wrap:hover .mood-spotlight {
+    opacity: 1;
+  }
+  /* Border glow layer */
+  .mood-border-glow {
+    position: absolute;
+    inset: -1px;
+    border-radius: 18px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .mood-card-wrap:hover .mood-border-glow {
+    opacity: 1;
+  }
+  .mood-btn {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    transition: transform 0.18s ease, box-shadow 0.25s ease;
+  }
+  .mood-card-wrap:hover .mood-btn {
+    transform: translateY(-2px) scale(1.02);
+  }
+  .mood-card-wrap:active .mood-btn {
+    transform: scale(0.97);
   }
 `
 
@@ -119,6 +163,24 @@ export default function MoodCheckIn() {
   const [error, setError]         = useState(null)
   const containerRef              = useRef(null)
   const textareaRef               = useRef(null)
+  const gridRef                   = useRef(null)
+  // Track mouse position per-card for spotlight effect
+  const [mousePos, setMousePos]   = useState({})   // { [moodId]: {x, y} }
+
+  const handleCardMouseMove = (e, id) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    setMousePos(prev => ({
+      ...prev,
+      [id]: {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      }
+    }))
+  }
+
+  const handleCardMouseLeave = (id) => {
+    setMousePos(prev => { const n = {...prev}; delete n[id]; return n })
+  }
 
   const mood = MOODS.find(m => m.id === selected)
 
@@ -183,7 +245,7 @@ export default function MoodCheckIn() {
                 <span className="w-1.5 h-1.5 rounded-full bg-[#a855f7] animate-pulse" />
                 Daily Check-In
               </div>
-              <h1 className="text-3xl font-bold text-[#2d1b4e] mb-2">How are you feeling today?</h1>
+              <h1 className="text-3xl font-serif text-[#2d1b4e] mb-2">How are you feeling today?</h1>
               <p className="text-[#2d1b4e] text-sm max-w-md mx-auto">
                 Take a moment to acknowledge your emotions. Every feeling is valid and worth noting.
               </p>
@@ -215,44 +277,92 @@ export default function MoodCheckIn() {
               className="bg-white rounded-2xl border border-[#f3e8ff] shadow-sm p-6"
               style={{ animation: 'fadeSlideUp 0.5s 0.1s ease both', opacity: 0 }}
             >
-              <p className="text-xs font-semibold text-[#9ca3af] uppercase tracking-widest mb-5">Select your mood</p>
+              <p className="text-xs font-semibold text-[#2d1b4e] uppercase tracking-widest mb-5">Select your mood</p>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {MOODS.map((m, i) => {
                   const isSelected = selected === m.id
+                  const pos = mousePos[m.id]
+
+                  // Radial spotlight gradient that follows cursor
+                  const spotlightBg = pos
+                    ? `radial-gradient(180px circle at ${pos.x}px ${pos.y}px, ${m.glow.replace('0.25','0.55')}, transparent 70%)`
+                    : 'none'
+
+                  // Animated border glow — a conic gradient rotating spotlight on the border
+                  const borderGlow = pos
+                    ? `radial-gradient(180px circle at ${pos.x}px ${pos.y}px, ${m.dot}, transparent 60%)`
+                    : 'none'
+
                   return (
-                    <button
+                    <div
                       key={m.id}
-                      onClick={() => setSelected(isSelected ? null : m.id)}
+                      className="mood-card-wrap"
                       style={{
-                        '--glow': m.glow,
-                        background: isSelected ? m.bg : 'transparent',
-                        borderColor: isSelected ? m.border : 'rgba(243,232,255,0.8)',
                         animation: `fadeSlideUp 0.4s ${i * 0.04}s ease both`,
                         opacity: 0,
-                        ...(isSelected && {
-                          boxShadow: `0 0 0 3px ${m.border}, 0 4px 20px ${m.glow}`,
-                          animation: `fadeSlideUp 0.4s ${i * 0.04}s ease both, moodPulse 2s ease infinite`,
-                        }),
                       }}
-                      className="relative flex flex-col items-center gap-2 px-3 py-4 rounded-2xl border-2 transition-all duration-200 hover:scale-[1.03] active:scale-95"
+                      onMouseMove={(e) => handleCardMouseMove(e, m.id)}
+                      onMouseLeave={() => handleCardMouseLeave(m.id)}
                     >
-                      {/* Selected dot */}
-                      {isSelected && (
-                        <span
-                          className="absolute top-2 right-2 w-2 h-2 rounded-full"
-                          style={{ background: m.dot }}
-                        />
-                      )}
+                      {/* Border glow layer */}
+                      <div
+                        className="mood-border-glow"
+                        style={{ background: borderGlow }}
+                      />
 
-                      <span className="text-3xl leading-none">{m.emoji}</span>
-                      <span className={`text-sm font-semibold ${isSelected ? 'text-[#4b2c82]' : 'text-[#6b7280]'}`}>
-                        {m.label}
-                      </span>
-                      <span className="text-[10px] text-[#9ca3af] text-center leading-tight">
-                        {m.desc}
-                      </span>
-                    </button>
+                      {/* Spotlight overlay */}
+                      <div
+                        className="mood-spotlight"
+                        style={{ background: spotlightBg }}
+                      />
+
+                      <button
+                        onClick={() => setSelected(isSelected ? null : m.id)}
+                        className="mood-btn flex flex-col items-center gap-2 px-3 py-4 border-2"
+                        style={{
+                          '--pulse-color': m.border,
+                          background: isSelected ? m.bg : 'rgba(255,255,255,0.7)',
+                          borderColor: isSelected ? m.dot : 'rgba(237,233,254,0.9)',
+                          boxShadow: isSelected
+                            ? `0 0 0 3px ${m.border}, 0 8px 28px ${m.glow}`
+                            : '0 2px 8px rgba(139,92,246,0.06)',
+                          ...(isSelected && {
+                            animation: 'moodPulse 2.5s ease infinite',
+                          }),
+                        }}
+                      >
+                        {/* Selected indicator */}
+                        {isSelected && (
+                          <span
+                            className="absolute top-2 right-2 w-2 h-2 rounded-full"
+                            style={{ background: m.dot, boxShadow: `0 0 6px ${m.dot}` }}
+                          />
+                        )}
+
+                        {/* Emoji with glow on selected */}
+                        <span
+                          className="text-3xl leading-none transition-transform duration-200"
+                          style={{
+                            filter: isSelected ? `drop-shadow(0 0 8px ${m.dot})` : 'none',
+                            transform: isSelected ? 'scale(1.12)' : 'scale(1)',
+                          }}
+                        >
+                          {m.emoji}
+                        </span>
+
+                        <span
+                          className="text-sm font-semibold transition-colors duration-200"
+                          style={{ color: isSelected ? m.dot : '#6b7280' }}
+                        >
+                          {m.label}
+                        </span>
+
+                        <span className="text-[10px] text-[#9ca3af] text-center leading-tight">
+                          {m.desc}
+                        </span>
+                      </button>
+                    </div>
                   )
                 })}
               </div>
@@ -279,10 +389,10 @@ export default function MoodCheckIn() {
             {/* ── Note ── */}
             <div
               className="bg-white rounded-2xl border border-[#f3e8ff] shadow-sm p-6"
-              style={{ animation: 'fadeSlideUp 0.5s 0.2s ease both', opacity: 100 }}
+              style={{ animation: 'fadeSlideUp 0.5s 0.2s ease both', opacity: 0 }}
             >
               <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-[#9ca3af] uppercase tracking-widest">Add a note</p>
+                <p className="text-xs font-semibold text-[#2d1b4e] uppercase tracking-widest">Add a note (Optional)</p>
                 <span className={`text-xs tabular-nums ${note.length > MAX_NOTE * 0.9 ? 'text-red-400' : 'text-[#c4b5fd]'}`}>
                   {note.length} / {MAX_NOTE}
                 </span>
