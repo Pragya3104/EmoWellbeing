@@ -79,3 +79,29 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
+
+import os
+from dotenv import load_dotenv
+from app.database import Base
+from app import models
+
+load_dotenv()
+
+target_metadata = Base.metadata
+
+def run_migrations_online():
+    from sqlalchemy import create_engine
+    from alembic import context
+
+    DATABASE_URL = os.getenv("DATABASE_URL")
+
+    engine = create_engine(DATABASE_URL)
+
+    with engine.connect() as connection:
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+        )
+
+        with context.begin_transaction():
+            context.run_migrations()

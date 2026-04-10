@@ -49,8 +49,6 @@ logs/
 backend/.env
 frontend/.env
 
-# Alembic / DB configs (IMPORTANT 🔥)
-alembic.ini
 
 # Optional: if you store DB configs here
 config.py
